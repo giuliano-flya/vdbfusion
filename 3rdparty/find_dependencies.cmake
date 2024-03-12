@@ -52,12 +52,14 @@ endif()
 if(USE_SYSTEM_OPENVDB)
   # When OpenVDB is available on the system, we just go for the dynamic version of it
   include(GNUInstallDirs)
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_INSTALL_FULL_LIBDIR}/cmake/OpenVDB")
-  find_package(OpenVDB QUIET)
+  # list(APPEND CMAKE_MODULE_PATH "${CMAKE_INSTALL_FULL_LIBDIR}/cmake/OpenVDB")
+  find_package(OpenVDB CONFIG REQUIRED QUIET)
   if(OpenVDB_FOUND AND OpenVDB_USES_BLOSC)
     # We need to get these hidden dependencies (if available) to static link them inside our library
     target_link_libraries(OpenVDB::openvdb INTERFACE Blosc::blosc)
   endif()
+  find_package(TBB CONFIG REQUIRED QUIET)
+  target_link_libraries(OpenVDB::openvdb INTERFACE TBB::tbb)
 endif()
 # When not using a pre installed version of OpenVDB we assume that no dependencies are installed and
 # therefore build blos-c, tbb, and libboost from soruce

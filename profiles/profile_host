@@ -1,0 +1,14 @@
+[settings]
+os=Linux
+arch=armv8
+compiler=gcc
+compiler.version=7
+compiler.libcxx=libstdc++11
+build_type=Release
+system-configuration=obc-bsp
+system-configuration.version=july-2023
+[options]
+[build_requires]
+[env]
+CHOST=aarch64-linux-gnu
+CONAN_CMAKE_TOOLCHAIN_FILE=/gaston_obc_bsp/host/share/buildroot/toolchainfile.cmake

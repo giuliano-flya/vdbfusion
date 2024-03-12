@@ -24,6 +24,7 @@ cmake_minimum_required(VERSION 3.10)
 project(VDBFusion VERSION 0.1.6 LANGUAGES CXX)
 
 # Setup build options
+option(RUN_CMAKE_CONAN "Whether to run the cmake version of conan" ON)
 option(USE_CCACHE "Build using Ccache if found on the path" ON)
 option(USE_SYSTEM_EIGEN3 "Use system pre-installed eigen3" ON)
 option(USE_SYSTEM_OPENVDB "Use system pre-installed OpenVDB" ON)
@@ -54,6 +55,34 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(RUN_CMAKE_CONAN)
+    if(CMAKE_CROSSCOMPILING)
+        set(CONAN_COMPILE_OPTIONS
+            PROFILE_HOST ${CMAKE_CURRENT_SOURCE_DIR}/profiles/profile_host
+            PROFILE_BUILD ${CMAKE_CURRENT_SOURCE_DIR}/profiles/profile_build)
+    else()
+        set(CONAN_COMPILE_OPTIONS
+            PROFILE_HOST ${CMAKE_CURRENT_SOURCE_DIR}/profiles/profile_build
+            PROFILE_BUILD ${CMAKE_CURRENT_SOURCE_DIR}/profiles/profile_build)
+    endif()
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
+    conan_cmake_autodetect(settings BUILD_TYPE ${TYPE})
+    conan_cmake_install(
+        PATH_OR_REFERENCE ${CMAKE_CURRENT_SOURCE_DIR}
+        BASIC_SETUP
+        CMAKE_TARGETS
+        INSTALL_FOLDER ${CMAKE_BINARY_DIR}/conanfiles
+        BUILD missing
+        UPDATE
+        ${CONAN_COMPILE_OPTIONS}
+        SETTINGS ${settings}
+        REMOTE flya-local
+        UPDATE
+    )
+endif()
+
+list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/conanfiles)
 
 # Find Dependencies from the 3rdparty directory.
 include(3rdparty/find_dependencies.cmake)
